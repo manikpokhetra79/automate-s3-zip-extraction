@@ -18,21 +18,29 @@ provider:
       statements:
         - Effect: "Allow"
           Action:
-            - "s3:*"
+            - "s3:PutObject"
+            - "s3:ListBucket"
+            - "s3:GetObject"
+            - "s3:PutObjectAcl"
             - "lambda:InvokeFunction"
-          Resource: "*"
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - Ref: MediaBucket
+                - "/*"
 
 custom:
   accountId: !Sub ${aws:accountId}
   RESOURCE_NAME_PREFIX: ${self:service}-${self:provider.stage}
   esbuild:
-  bundle: true
-  minify: false
-  packager: "npm"
-  platform: "node"
-  concurrency: 10
-  exclude:
-    - "aws-sdk"
+    bundle: true
+    minify: false
+    packager: "npm"
+    platform: "node"
+    concurrency: 10
+    exclude:
+      - "aws-sdk"
 
 plugins:
   - serverless-esbuild
