@@ -1,6 +1,6 @@
 Type: AWS::S3::Bucket
 Properties:
-  BucketName: ${self:custom.RESOURCE_NAME_PREFIX}-media-bucket
+  BucketName: ${self:custom.S3_MEDIA_BUCKET_NAME}
   CorsConfiguration:
     CorsRules:
       - AllowedHeaders:
