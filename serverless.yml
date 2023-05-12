@@ -1,0 +1,64 @@
+service: automate-s3-zip-extraction
+frameworkVersion: "3"
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  architecture: arm64
+  region: ${opt:region, 'us-east-2'}
+  stage: ${opt:stage ,'development'}
+  versionFunctions: false
+  environment:
+    STAGE: ${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:PutObject"
+            - "s3:ListBucket"
+            - "s3:GetObject"
+            - "s3:PutObjectAcl"
+            - "lambda:InvokeFunction"
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - Ref: MediaBucket
+                - "/*"
+
+custom:
+  accountId: !Sub ${aws:accountId}
+  RESOURCE_NAME_PREFIX: ${self:service}-${self:provider.stage}
+  esbuild:
+    bundle: true
+    minify: false
+    packager: "npm"
+    platform: "node"
+    concurrency: 10
+    exclude:
+      - "aws-sdk"
+
+plugins:
+  - serverless-esbuild
+
+functions:
+  ZipFileExtraction:
+    handler: src/lambdas/S3BucketLambdaTriggers/handler.index
+    description: Handler for S3 Bucket lambda trigger.
+    memorySize: 2048
+    timeout: 300
+    events:
+      - s3:
+          bucket: !Ref MediaBucket
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .zip
+          existing: true
+
+resources:
+  Resources:
+    MediaBucket: ${file(./resources/S3/MediaBucket.yml)}

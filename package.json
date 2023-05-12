@@ -1,0 +1,29 @@
+{
+  "name": "automate-s3-zip-extraction",
+  "version": "1.0.0",
+  "description": "Serverless application to automate extraction of zip file on upload to S3.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manikpokhetra79/automate-s3-zip-extraction.git"
+  },
+  "keywords": [
+    "S3"
+  ],
+  "author": "manikpokhetra",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/manikpokhetra79/automate-s3-zip-extraction/issues"
+  },
+  "homepage": "https://github.com/manikpokhetra79/automate-s3-zip-extraction#readme",
+  "devDependencies": {
+    "esbuild": "^0.17.18",
+    "serverless": "^3.30.1",
+    "serverless-esbuild": "^1.44.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}
