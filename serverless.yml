@@ -1,9 +1,13 @@
 service: automate-s3-zip-extraction
 frameworkVersion: "3"
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs16.x
+  architecture: arm64
   region: ${opt:region, 'us-east-2'}
   stage: ${opt:stage ,'development'}
   versionFunctions: false
@@ -21,14 +25,24 @@ provider:
 custom:
   accountId: !Sub ${aws:accountId}
   RESOURCE_NAME_PREFIX: ${self:service}-${self:provider.stage}
+  esbuild:
+  bundle: true
+  minify: false
+  packager: "npm"
+  platform: "node"
+  concurrency: 10
+  exclude:
+    - "aws-sdk"
+
+plugins:
+  - serverless-esbuild
 
 functions:
   ZipFileExtraction:
     handler: src/lambdas/S3BucketLambdaTriggers/handler.index
     description: Handler for S3 Bucket lambda trigger.
-    memorySize: 10240 # configured 10GB to accommodate extraction of large zip files.
-    timeout: 900
-    reservedConcurrency: 5
+    memorySize: 2048
+    timeout: 300
     events:
       - s3:
           bucket: !Ref MediaBucket
@@ -37,6 +51,6 @@ functions:
             - suffix: .zip
           existing: true
 
-Resources:
-  resources:
+resources:
+  Resources:
     MediaBucket: ${file(./resources/S3/MediaBucket.yml)}
