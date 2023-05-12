@@ -13,6 +13,7 @@ provider:
   versionFunctions: false
   environment:
     STAGE: ${self:provider.stage}
+    RESOURCE_NAME_PREFIX: ${self:service}-${self:provider.stage}
   iam:
     role:
       statements:
@@ -32,7 +33,7 @@ provider:
 
 custom:
   accountId: !Sub ${aws:accountId}
-  RESOURCE_NAME_PREFIX: ${self:service}-${self:provider.stage}
+  S3_MEDIA_BUCKET_NAME: ${self:provider.environment.RESOURCE_NAME_PREFIX}-media-bucket
   esbuild:
     bundle: true
     minify: false
