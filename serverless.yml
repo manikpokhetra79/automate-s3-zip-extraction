@@ -1,0 +1,42 @@
+service: automate-s3-zip-extraction
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: ${opt:region, 'us-east-2'}
+  stage: ${opt:stage ,'development'}
+  versionFunctions: false
+  environment:
+    STAGE: ${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:*"
+            - "lambda:InvokeFunction"
+          Resource: "*"
+
+custom:
+  accountId: !Sub ${aws:accountId}
+  RESOURCE_NAME_PREFIX: ${self:service}-${self:provider.stage}
+
+functions:
+  ZipFileExtraction:
+    handler: src/lambdas/S3BucketLambdaTriggers/handler.index
+    description: Handler for S3 Bucket lambda trigger.
+    memorySize: 10240 # configured 10GB to accommodate extraction of large zip files.
+    timeout: 900
+    reservedConcurrency: 5
+    events:
+      - s3:
+          bucket: !Ref MediaBucket
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .zip
+          existing: true
+
+Resources:
+  resources:
+    MediaBucket: ${file(./resources/S3/MediaBucket.yml)}
